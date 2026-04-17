@@ -5,6 +5,7 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class TransactionIngestor {
@@ -13,7 +14,6 @@ public class TransactionIngestor {
     }
 
     public List<Transaction> obtainTransactionsFromCSV(String fileName, long amountLines) {
-
         Path path = Path.of(fileName);
         try (Stream<String> lines = Files.lines(path)) {
             return lines
@@ -23,6 +23,24 @@ public class TransactionIngestor {
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .toList();
+        } catch (IOException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Error while read file");
+        }
+    }
+
+    public Map<String,Transaction> obtainOriginTransactionMapFromCSV(String fileName, long amountLines) {
+        Path path = Path.of(fileName);
+        try (Stream<String> lines = Files.lines(path)) {
+            return lines
+                    .skip(1)
+                    .limit(amountLines)
+                    .map(this::parseToTransaction)
+                    .filter(Optional::isPresent)
+                    .map(Optional::get)
+                    .collect(Collectors.toMap(
+                            transaction -> transaction.origin().name(),
+                            transaction -> transaction));
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error while read file");
