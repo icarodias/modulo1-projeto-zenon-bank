@@ -5,11 +5,9 @@ import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
 public class TransactionIngestor {
-    private final AtomicInteger atomicInter = new AtomicInteger(0);
 
     public TransactionIngestor(){
     }
@@ -18,25 +16,20 @@ public class TransactionIngestor {
 
         Path path = Path.of(fileName);
         try (Stream<String> lines = Files.lines(path)) {
-            List<Transaction> transactions = lines
+            return lines
                     .skip(1)
                     .limit(amountLines)
-                    .map(line -> this.parseToTransaction(line, atomicInter))
+                    .map(this::parseToTransaction)
                     .filter(Optional::isPresent)
                     .map(Optional::get)
                     .toList();
-
-            System.out.println("Metric: Total raws with error: " + atomicInter.get());
-            atomicInter.set(0);
-
-            return transactions;
         } catch (IOException e) {
             e.printStackTrace();
             throw new RuntimeException("Error while read file");
         }
     }
 
-    private Optional<Transaction> parseToTransaction(String transactionRaw, AtomicInteger atomicInter) {
+    private Optional<Transaction> parseToTransaction(String transactionRaw) {
         final String delimiterCSV = ",";
         int fieldsInTransactionRaw = 11;
         final String[] fields = transactionRaw.split(delimiterCSV);
@@ -66,7 +59,6 @@ public class TransactionIngestor {
             ));
         } catch (Exception ex) {
             System.err.println("Error: " + transactionRaw + " | " + ex.getMessage());
-            atomicInter.addAndGet(1);
             return Optional.empty();
         }
     }
