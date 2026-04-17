@@ -7,7 +7,7 @@ public class Main {
         final TransactionIngestor ingestor = new TransactionIngestor();
 
         /* file in ../data dir and fileName PS_20174392719_1491204439457_log.csv */
-        final String relativeFilePath = "../data/PS_20174392719_1491204439457_log.csv";
+        final String relativeFilePath = "../data/paysim_with_bad_data.csv";
         final int amountLines = 1000;
 
         final List<Transaction> transactions =  ingestor.obtainTransactionsFromCSV(relativeFilePath, amountLines);
