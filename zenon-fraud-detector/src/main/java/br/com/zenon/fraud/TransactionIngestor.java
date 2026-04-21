@@ -29,6 +29,16 @@ public class TransactionIngestor {
         }
     }
 
+    public Stream<Transaction> obtainTransactionsFromCSV(String fileName) throws IOException {
+        Path path = Path.of(fileName);
+        Stream<String> lines = Files.lines(path);
+        return lines
+                .skip(1)
+                .map(this::parseToTransaction)
+                .filter(Optional::isPresent)
+                .map(Optional::get);
+    }
+
     public Map<String,Transaction> obtainOriginTransactionMapFromCSV(String fileName, long amountLines) {
         Path path = Path.of(fileName);
         try (Stream<String> lines = Files.lines(path)) {
